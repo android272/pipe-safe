@@ -1,0 +1,21 @@
+{
+  "name": "vite-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "deploy": "gh-pages -d dist",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0",
+    "glob": "^11.0.3",
+    "ts-md5": "^2.0.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.5",
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-pwa": "^1.0.1"
+  }
+}
