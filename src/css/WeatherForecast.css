@@ -27,7 +27,7 @@
   text-align: center;
   box-shadow: var(--shadow-outset);
   transition: transform 0.3s, box-shadow 0.3s;
-  max-width: 4.6em;
+  max-width: 4.9em;
 }
 
 .forecast-box:hover {

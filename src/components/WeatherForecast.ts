@@ -23,7 +23,7 @@ interface ForecastItem {
 export function setupWeatherForecast(
   container: HTMLElement,
   weatherService: { fetchWeatherData: () => Promise<[any, ForecastData]> },
-  checkSafety: (temp: number, humidity: number) => { status: string; reason: string },
+  checkSafety: (temp: number) => { status: string },
   getTempColor: (temp: number) => string,
   getHumidityColor: (humidity: number) => string,
   parkingComponent: { getParkingCondition: () => string }
@@ -56,14 +56,14 @@ export function setupWeatherForecast(
       prev.dt >= next.dt
     ) {
       return {
-        time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
         temp: prev.temp || next.temp || 0,
         humidity: prev.humidity || next.humidity || 0,
       };
     }
     const fraction = (targetTime - prev.dt) / (next.dt - prev.dt);
     return {
-      time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+      time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
       temp: Math.round(prev.temp + (next.temp - prev.temp) * fraction),
       humidity: Math.round(prev.humidity + (next.humidity - prev.humidity) * fraction),
     };
@@ -102,7 +102,7 @@ export function setupWeatherForecast(
         const now = new Date();
         const nowUnix = Math.floor(now.getTime() / 1000);
         const twelveHoursLater = nowUnix + 12 * 3600;
-        const forecastItems: ForecastItem[] = [{ time: 'Now</br></br>', temp: currentTemp, humidity: currentHumidity }];
+        const forecastItems: ForecastItem[] = [{ time: 'Now', temp: currentTemp, humidity: currentHumidity }];
 
         const apiPoints = (forecast.list || [])
           .filter(
@@ -126,7 +126,7 @@ export function setupWeatherForecast(
 
           if (!prevPoint || !nextPoint) {
             forecastItems.push({
-              time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+              time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
               temp: currentTemp,
               humidity: currentHumidity,
             });
@@ -135,7 +135,7 @@ export function setupWeatherForecast(
 
           if (prevPoint.dt === targetTime || Math.abs(prevPoint.dt - targetTime) < 300) {
             forecastItems.push({
-              time: new Date(prevPoint.dt * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+              time: new Date(prevPoint.dt * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
               temp: prevPoint.main.temp + tempAdjustment,
               humidity: prevPoint.main.humidity,
             });
