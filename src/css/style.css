@@ -253,6 +253,13 @@ input:focus, select:focus {
   height: auto;
   margin: 20px auto;
   display: block;
+  text-align: center;
+  background: var(--secondary-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  padding: 0.5em;
+  box-shadow: var(--shadow-inset);
+  transition: transform 0.3s;
 }
 
 .reason {
