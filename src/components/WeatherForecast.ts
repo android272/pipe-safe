@@ -78,7 +78,7 @@ export function setupWeatherForecast(
     lastCurrentHumidity = currentHumidity;
     lastIsCurrentlySafe = isCurrentlySafe;
     lastCurrentStatus = currentStatus;
-    console.log("WeatherForecast: Updating forecast, currentTemp:", currentTemp); // Debug
+    console.log("WeatherForecast: Updating forecast, currentTemp:", currentTemp);
 
     weatherService
       .fetchWeatherData()
@@ -152,7 +152,7 @@ export function setupWeatherForecast(
         // Calculate forecast summary
         let forecastSummary = "";
         const allSameStatus = forecastItems.slice(1).every((item) => {
-          const itemStatus = checkSafety(item.temp, item.humidity).status;
+          const itemStatus = checkSafety(item.temp).status;
           return itemStatus === (isCurrentlySafe ? currentStatus : 'not-safe');
         });
 
@@ -161,7 +161,7 @@ export function setupWeatherForecast(
         } else {
           for (let i = 1; i < forecastItems.length; i++) {
             const item = forecastItems[i];
-            const itemStatus = checkSafety(item.temp, item.humidity).status;
+            const itemStatus = checkSafety(item.temp).status;
             const isItemSafe = itemStatus === 'safe' || itemStatus === 'warning';
             if (isItemSafe !== isCurrentlySafe) {
               const changeTime = new Date(nowUnix * 1000 + i * 3600);

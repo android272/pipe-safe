@@ -37,25 +37,16 @@ export function setupWeatherDisplay(
         };
   }
 
-  const checkSafety = (temp: number, humidity: number): { status: string; reason: string } => {
-    if (!Number.isFinite(temp) || !Number.isFinite(humidity)) {
+  const checkSafety = (temp: number): { status: string; reason: string } => {
+    if (!Number.isFinite(temp)) {
       return { status: 'not-safe', reason: 'Invalid data' };
     }
+
     const roundedTemp = Math.round(temp);
-    const roundedHumidity = Math.round(humidity);
-    const maxHumidity = settings.humidityThreshold;
     if (roundedTemp < 50) return { status: 'not-safe', reason: `Too cold: ${roundedTemp}°F` };
     if (roundedTemp >= 85) return { status: 'not-safe', reason: `Too hot: ${roundedTemp}°F` };
-    if (roundedHumidity < 50) return { status: 'not-safe', reason: `Too dry: ${roundedHumidity}%` };
-    if (roundedHumidity > maxHumidity) return { status: 'not-safe', reason: `Too humid: ${roundedHumidity}%` };
-    if (
-      (roundedTemp >= 83 && roundedTemp < 85) ||
-      (roundedTemp >= 50 && roundedTemp <= 52) ||
-      (roundedHumidity >= maxHumidity - 2 && roundedHumidity <= maxHumidity) ||
-      (roundedHumidity >= 50 && roundedHumidity <= 52)
-    ) {
-      return { status: 'warning', reason: 'Conditions near unsafe thresholds' };
-    }
+    if (roundedTemp >= 83 && roundedTemp < 85) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
+    if (roundedTemp >= 50 && roundedTemp <= 52) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
     return { status: 'safe', reason: 'Conditions ideal' };
   };
 
@@ -101,7 +92,7 @@ export function setupWeatherDisplay(
         const currentTemp = Number.isFinite(current.main?.temp) ? current.main.temp + tempAdjustment : NaN;
         const currentHumidity = Number.isFinite(current.main?.humidity) ? current.main.humidity : NaN;
         console.log('WeatherDisplay: Current temp after adjustment:', currentTemp);
-        const { status, reason } = checkSafety(currentTemp, currentHumidity);
+        const { status, reason } = checkSafety(currentTemp);
         currentStatus = status;
         const tempColor = getTempColor(currentTemp);
         const humidityColor = getHumidityColor(currentHumidity);
