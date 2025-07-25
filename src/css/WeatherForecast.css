@@ -14,25 +14,7 @@
   border-radius: 17px;
   margin: 20px 0;
   box-shadow: var(--shadow-inset);
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent-color) transparent;
-}
-
-.forecast-well::-webkit-scrollbar {
-  height: 8px;
-}
-
-.forecast-well::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.forecast-well::-webkit-scrollbar-thumb {
-  background: var(--accent-color);
-  border-radius: 4px;
-}
-
-.forecast-well::-webkit-scrollbar-button {
-  display: none;
+  scrollbar-width: none;
 }
 
 .forecast-box {
