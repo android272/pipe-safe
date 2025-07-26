@@ -1,8 +1,8 @@
 import '../css/Modal.css';
 
 export function setupInfoModal(container: HTMLElement) {
-  // Render UI
-  container.innerHTML = `
+    // Render UI
+    container.innerHTML = `
     <button class="info-button"><i class="fa-solid fa-info"></i></button>
     <div class="modal" id="infoModal">
       <div class="modal-content">
@@ -19,32 +19,32 @@ export function setupInfoModal(container: HTMLElement) {
     </div>
   `;
 
-  // Toggle modal visibility
-  const modal = container.querySelector('.modal') as HTMLElement;
-  const infoButton = container.querySelector('.info-button') as HTMLButtonElement;
-  const closeButton = container.querySelector('#close-info') as HTMLButtonElement;
+    // Toggle modal visibility
+    const modal = container.querySelector('.modal') as HTMLElement;
+    const infoButton = container.querySelector('.info-button') as HTMLButtonElement;
+    const closeButton = container.querySelector('#close-info') as HTMLButtonElement;
 
-  const closeModal = () => {
-    modal.classList.remove('active');
-  };
+    const closeModal = () => {
+        modal.classList.remove('active');
+    };
 
-  infoButton.addEventListener('click', () => {
-    modal.classList.add('active');
-  });
+    infoButton.addEventListener('click', () => {
+        modal.classList.add('active');
+    });
 
-  closeButton.addEventListener('click', closeModal);
+    closeButton.addEventListener('click', closeModal);
 
-  // ESC key to close
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-      closeModal();
-    }
-  });
+    // ESC key to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
 
-  // Click outside to close
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
 }

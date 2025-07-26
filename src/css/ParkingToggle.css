@@ -1,117 +1,117 @@
 .parking-toggle-well {
-  background: var(--secondary-bg);
-  backdrop-filter: blur(10px);
-  border-radius: 30px;
-  padding: 0.5em;
-  margin: 20px auto;
-  max-width: 300px;
-  box-shadow: var(--shadow-inset);
-  transition: transform 0.3s;
+    background: var(--secondary-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 0.5em;
+    margin: 20px auto;
+    max-width: 300px;
+    box-shadow: var(--shadow-inset);
+    transition: transform 0.3s;
 }
 
 .parking-toggle-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5em 1em;
-  position: relative;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5em 1em;
+    position: relative;
+    cursor: pointer;
 }
 
 .parking-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: var(--text-color);
-  font-weight: 600;
-  transition: color 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-color);
+    font-weight: 600;
+    transition: color 0.3s;
 }
 
 .parking-option.shade.active {
-  color: var(--accent-color);
+    color: var(--accent-color);
 }
 
 .parking-option.open.active {
-  color: var(--warning-color);
+    color: var(--warning-color);
 }
 
 .parking-option i {
-  font-size: 1.4rem;
+    font-size: 1.4rem;
 }
 
 .parking-toggle {
-  position: relative;
-  width: 60px;
-  height: 30px;
+    position: relative;
+    width: 60px;
+    height: 30px;
 }
 
 .parking-toggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .parking-toggle label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, var(--accent-color), #2B4A7C);
-  border-radius: 15px;
-  cursor: pointer;
-  transition: background 0.3s;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, var(--accent-color), #2B4A7C);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .parking-toggle label::after {
-  content: '';
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #334055;
-  top: 2px;
-  left: 2px;
-  transition: transform 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #334055;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .parking-toggle label i {
-  position: absolute;
-  top: 50%;
-  left: 5px;
-  transform: translateY(-50%);
-  font-size: 1rem;
-  color: var(--accent-color);
-  z-index: 2;
-  transition: left 0.3s, transform 0.3s;
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--accent-color);
+    z-index: 2;
+    transition: left 0.3s, transform 0.3s;
 }
 
-.parking-toggle input:checked + label {
-  background: linear-gradient(45deg, var(--warning-color), #2B4A7C);
+.parking-toggle input:checked+label {
+    background: linear-gradient(45deg, var(--warning-color), #2B4A7C);
 }
 
-.parking-toggle input:checked + label::after {
-  transform: translateX(32px);
-  left: -1px;
+.parking-toggle input:checked+label::after {
+    transform: translateX(32px);
+    left: -1px;
 }
 
-.parking-toggle input:not(:checked) + label i {
-  transform: translateY(-50%) scaleX(-1);
+.parking-toggle input:not(:checked)+label i {
+    transform: translateY(-50%) scaleX(-1);
 }
 
-.parking-toggle input:checked + label i {
-  color: var(--warning-color);
-  left: 35px;
-  transform: translateY(-50%) scaleX(1);
+.parking-toggle input:checked+label i {
+    color: var(--warning-color);
+    left: 35px;
+    transform: translateY(-50%) scaleX(1);
 }
 
 .car-warning {
-  margin-top: 10px;
-  font-size: 1rem;
-  color: var(--warning-color);
-  text-align: center;
-  font-weight: 500;
+    margin-top: 10px;
+    font-size: 1rem;
+    color: var(--warning-color);
+    text-align: center;
+    font-weight: 500;
 }

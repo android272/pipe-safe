@@ -1,66 +1,66 @@
 .forecast-summary {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
 }
 
 .forecast-well {
-  display: flex;
-  overflow-x: auto;
-  padding: 15px 20px;
-  background: var(--secondary-bg);
-  backdrop-filter: blur(10px);
-  border-radius: 17px;
-  margin: 20px 0;
-  box-shadow: var(--shadow-inset);
-  scrollbar-width: none;
+    display: flex;
+    overflow-x: auto;
+    padding: 15px 20px;
+    background: var(--secondary-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 17px;
+    margin: 20px 0;
+    box-shadow: var(--shadow-inset);
+    scrollbar-width: none;
 }
 
 .forecast-box {
-  flex: 0 0 auto;
-  width: 120px;
-  margin-right: 15px;
-  padding: 15px;
-  background: var(--primary-bg);
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: var(--shadow-outset);
-  transition: transform 0.3s, box-shadow 0.3s;
-  max-width: 4.9em;
+    flex: 0 0 auto;
+    width: 120px;
+    margin-right: 15px;
+    padding: 15px;
+    background: var(--primary-bg);
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--shadow-outset);
+    transition: transform 0.3s, box-shadow 0.3s;
+    max-width: 4.9em;
 }
 
 .forecast-box:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--hover-shadow);
+    transform: translateY(-4px);
+    box-shadow: var(--hover-shadow);
 }
 
 .forecast-box .time {
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
 }
 
 .weather-icon {
-  font-size: 1.2rem;
-  color: var(--text-color);
-  margin-bottom: 5px;
-  display: flex;
-  justify-content: center;
-  padding: 0.5em 0 0.25em 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: center;
+    padding: 0.5em 0 0.25em 0;
 }
 
 .forecast-box .temp,
 .forecast-box .humidity {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 .forecast-box .temp i,
 .forecast-box .humidity i {
-  margin-right: 8px;
-  font-size: 1rem;
+    margin-right: 8px;
+    font-size: 1rem;
 }

@@ -1,17 +1,17 @@
 import '../css/Modal.css';
 
 export function setupLiabilityWaiver(
-  container: HTMLElement,
-  renderApp: () => void
+    container: HTMLElement,
+    renderApp: () => void
 ) {
-  // Check if waiver is already accepted
-  const waiverAccepted = localStorage.getItem('waiverAccepted');
-  if (waiverAccepted === 'true') {
-    renderApp();
-    return;
-  }
+    // Check if waiver is already accepted
+    const waiverAccepted = localStorage.getItem('waiverAccepted');
+    if (waiverAccepted === 'true') {
+        renderApp();
+        return;
+    }
 
-  container.innerHTML = `
+    container.innerHTML = `
     <div class="modal active" id="waiverModal">
       <div class="modal-content">
         <h2>PipeSafe Disclaimer</h2>
@@ -24,16 +24,16 @@ export function setupLiabilityWaiver(
     </div>
   `;
 
-  const acceptButton = container.querySelector('#accept-waiver') as HTMLButtonElement;
-  const declineButton = container.querySelector('#decline-waiver') as HTMLButtonElement;
+    const acceptButton = container.querySelector('#accept-waiver') as HTMLButtonElement;
+    const declineButton = container.querySelector('#decline-waiver') as HTMLButtonElement;
 
-  acceptButton.addEventListener('click', () => {
-    localStorage.setItem('waiverAccepted', 'true');
-    container.innerHTML = '';
-    renderApp();
-  });
+    acceptButton.addEventListener('click', () => {
+        localStorage.setItem('waiverAccepted', 'true');
+        container.innerHTML = '';
+        renderApp();
+    });
 
-  declineButton.addEventListener('click', () => {
-    container.innerHTML = '<p>You must accept the disclaimer to use PipeSafe.</p>';
-  });
+    declineButton.addEventListener('click', () => {
+        container.innerHTML = '<p>You must accept the disclaimer to use PipeSafe.</p>';
+    });
 }

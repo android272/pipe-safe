@@ -1,13 +1,13 @@
 import '../css/Modal.css';
 
 export function setupApiKeyModal(container: HTMLElement, renderApp: () => void) {
-  const apiKey = localStorage.getItem('weatherApiKey');
-  if (apiKey) {
-    renderApp();
-    return;
-  }
+    const apiKey = localStorage.getItem('weatherApiKey');
+    if (apiKey) {
+        renderApp();
+        return;
+    }
 
-  container.innerHTML = `
+    container.innerHTML = `
     <div class="modal active" id="apiKeyModal">
       <div class="modal-content">
         <h2>Enter OpenWeatherMap API Key</h2>
@@ -21,18 +21,18 @@ export function setupApiKeyModal(container: HTMLElement, renderApp: () => void) 
     </div>
   `;
 
-  const saveButton = container.querySelector('#save-api-key') as HTMLButtonElement;
-  const input = container.querySelector('#api-key-input') as HTMLInputElement;
+    const saveButton = container.querySelector('#save-api-key') as HTMLButtonElement;
+    const input = container.querySelector('#api-key-input') as HTMLInputElement;
 
-  saveButton.addEventListener('click', () => {
-    const key = input.value.trim();
-    if (key) {
-      localStorage.setItem('weatherApiKey', key);
-      container.innerHTML = '';
-      renderApp();
-    } else {
-      input.placeholder = 'API Key cannot be empty';
-      input.value = '';
-    }
-  });
+    saveButton.addEventListener('click', () => {
+        const key = input.value.trim();
+        if (key) {
+            localStorage.setItem('weatherApiKey', key);
+            container.innerHTML = '';
+            renderApp();
+        } else {
+            input.placeholder = 'API Key cannot be empty';
+            input.value = '';
+        }
+    });
 }

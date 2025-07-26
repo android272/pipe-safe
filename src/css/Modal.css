@@ -1,91 +1,91 @@
 .modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--modal-backdrop);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-backdrop);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .modal.active {
-  display: flex;
-  opacity: 1;
+    display: flex;
+    opacity: 1;
 }
 
 .modal-content {
-  background: var(--secondary-bg);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 24px;
-  width: 400px;
-  max-width: 90%;
-  box-shadow: var(--shadow-outset);
-  transform: translateY(20px);
-  transition: transform 0.3s ease-in-out;
+    background: var(--secondary-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 24px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: var(--shadow-outset);
+    transform: translateY(20px);
+    transition: transform 0.3s ease-in-out;
 }
 
 .modal.active .modal-content {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 .modal-content h2,
 .modal-content h3 {
-  margin-top: 0;
-  font-size: 1.8rem;
-  color: var(--text-color);
-  font-weight: 600;
+    margin-top: 0;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    font-weight: 600;
 }
 
 .modal-content .settings-group,
 .modal-content .radio-group,
 .modal-content .car-temp-options {
-  margin: 20px 0;
+    margin: 20px 0;
 }
 
 .modal-content .radio-group label,
 .modal-content .car-temp-options label {
-  margin-right: 15px;
-  font-size: 1rem;
-  color: var(--text-color);
-  font-weight: 500;
+    margin-right: 15px;
+    font-size: 1rem;
+    color: var(--text-color);
+    font-weight: 500;
 }
 
 .modal-content button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .modal-content .save-settings,
 .modal-content .accept-waiver {
-  background: var(--button-gradient);
-  color: white;
+    background: var(--button-gradient);
+    color: white;
 }
 
 .modal-content .close-settings,
 .modal-content .decline-waiver {
-  background: linear-gradient(45deg, #6c757d, #495057);
-  color: white;
+    background: linear-gradient(45deg, #6c757d, #495057);
+    color: white;
 }
 
 .modal-content button:hover {
-  transform: scale(1.05);
-  box-shadow: var(--hover-shadow);
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
 }
 
 .modal-content p {
-  margin: 15px 0;
-  color: var(--text-color);
-  font-size: 1rem;
+    margin: 15px 0;
+    color: var(--text-color);
+    font-size: 1rem;
 }
