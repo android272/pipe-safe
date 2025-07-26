@@ -61,7 +61,7 @@ export function setupWeatherForecast(
                 time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
                 temp: prev.temp || next.temp || 0,
                 humidity: prev.humidity || next.humidity || 0,
-                weatherIcon: getWeatherIcon(prev.weather || []),
+                weatherIcon: getWeatherIcon(prev.weather || [], targetTime),
             };
         }
         const fraction = (targetTime - prev.dt) / (next.dt - prev.dt);
@@ -69,21 +69,29 @@ export function setupWeatherForecast(
             time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
             temp: Math.round(prev.temp + (next.temp - prev.temp) * fraction),
             humidity: Math.round(prev.humidity + (next.humidity - prev.humidity) * fraction),
-            weatherIcon: getWeatherIcon(prev.weather || []),
+            weatherIcon: getWeatherIcon(prev.weather || [], targetTime),
         };
     };
 
-    // Add weather icon mapping function
-    const getWeatherIcon = (weather: { id: number; main: string }[]): string => {
+    // Update weather icon mapping function with time check
+    const getWeatherIcon = (weather: { id: number; main: string }[], timestamp: number): string => {
         if (!weather || weather.length === 0) {
             // Invalid data - random Meteor or Dragon
             return Math.random() < 0.5 ? '<i class="fa-solid fa-meteor"></i>' : '<i class="fa-solid fa-dragon"></i>';
         }
-        const condition = weather[0]; // Use the first weather condition
+        const condition = weather[0];
         const id = condition.id;
         const main = condition.main.toLowerCase();
+        const date = new Date(timestamp * 1000);
+        const hour = date.getUTCHours(); // Use UTC to match API time (adjust if local time is needed)
 
-        if (id === 800) return '<i class="fa-solid fa-sun"></i>'; // Clear / Sunny
+        // Check for Clear/Sunny (id 800) and nighttime (8 PM to 5 AM)
+        if (id === 800) {
+            if (hour >= 20 || hour < 10) { // 8 PM to 5 AM
+                return '<i class="fa-solid fa-moon"></i>';
+            }
+            return '<i class="fa-solid fa-sun"></i>';
+        }
         if (id >= 801 && id <= 804) return '<i class="fa-solid fa-cloud"></i>'; // Cloudy
         if (main.includes('rain')) return '<i class="fa-solid fa-cloud-showers-heavy"></i>'; // Rainy
         if (main.includes('snow')) return '<i class="fa-solid fa-snowflake"></i>'; // Snowy
@@ -132,7 +140,7 @@ export function setupWeatherForecast(
                     time: 'Now',
                     temp: currentTemp,
                     humidity: currentHumidity,
-                    weatherIcon: getWeatherIcon(current.weather || [])
+                    weatherIcon: getWeatherIcon(current.weather || [], nowUnix),
                 }];
 
                 const apiPoints = (forecast.list || [])
@@ -160,7 +168,7 @@ export function setupWeatherForecast(
                             time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
                             temp: currentTemp,
                             humidity: currentHumidity,
-                            weatherIcon: getWeatherIcon(prevPoint?.weather || []),
+                            weatherIcon: getWeatherIcon(prevPoint?.weather || [], targetTime),
                         });
                         continue;
                     }
@@ -170,7 +178,7 @@ export function setupWeatherForecast(
                             time: new Date(prevPoint.dt * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
                             temp: prevPoint.main.temp + tempAdjustment,
                             humidity: prevPoint.main.humidity,
-                            weatherIcon: getWeatherIcon(prevPoint.weather || []),
+                            weatherIcon: getWeatherIcon(prevPoint.weather || [], prevPoint.dt),
                         });
                     } else {
                         const interpolated = interpolateHour(
