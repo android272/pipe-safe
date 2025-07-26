@@ -44,9 +44,9 @@ export function setupWeatherDisplay(
 
         const roundedTemp = Math.round(temp);
         if (roundedTemp < 50) return { status: 'not-safe', reason: `Too cold: ${roundedTemp}°F` };
-        if (roundedTemp >= 85) return { status: 'not-safe', reason: `Too hot: ${roundedTemp}°F` };
-        if (roundedTemp >= 83 && roundedTemp < 85) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
-        if (roundedTemp >= 50 && roundedTemp <= 52) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
+        if (roundedTemp >= 90) return { status: 'not-safe', reason: `Too hot: ${roundedTemp}°F` };
+        if (roundedTemp >= 75 && roundedTemp <= 90) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
+        if (roundedTemp >= 50 && roundedTemp <= 65) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
         return { status: 'safe', reason: 'Conditions ideal' };
     };
 
