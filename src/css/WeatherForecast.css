@@ -41,6 +41,15 @@
   margin-bottom: 8px;
 }
 
+.weather-icon {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: center;
+  padding: 0.5em 0 0.25em 0;
+}
+
 .forecast-box .temp,
 .forecast-box .humidity {
   display: flex;

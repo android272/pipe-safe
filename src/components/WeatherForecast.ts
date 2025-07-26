@@ -1,23 +1,25 @@
 import '../css/WeatherForecast.css';
 
 interface ForecastData {
-  cod: number | string;
-  list: Array<{
-    dt: number;
-    main: { temp: number; humidity: number };
-    dt_txt: string;
-  }>;
+    cod: number | string;
+    list: Array<{
+        dt: number;
+        main: { temp: number; humidity: number };
+        dt_txt: string;
+        weather: { id: number; main: string }[]; // Add weather array
+    }>;
 }
 
 interface Settings {
-  humidityThreshold: number;
-  carTempIncrease: number; // No carTempEstimatorEnabled
+    humidityThreshold: number;
+    carTempIncrease: number; // No carTempEstimatorEnabled
 }
 
 interface ForecastItem {
-  time: string;
-  temp: number;
-  humidity: number;
+    time: string;
+    temp: number;
+    humidity: number;
+    weatherIcon: string; // Add weatherIcon
 }
 
 export function setupWeatherForecast(
@@ -45,8 +47,8 @@ export function setupWeatherForecast(
 
   const interpolateHour = (
     targetTime: number,
-    prev: { dt: number; temp: number; humidity: number },
-    next: { dt: number; temp: number; humidity: number }
+    prev: { dt: number; temp: number; humidity: number; weather?: { id: number; main: string }[] },
+    next: { dt: number; temp: number; humidity: number; weather?: { id: number; main: string }[] }
   ): ForecastItem => {
     if (
       !Number.isFinite(prev.temp) ||
@@ -59,6 +61,7 @@ export function setupWeatherForecast(
         time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
         temp: prev.temp || next.temp || 0,
         humidity: prev.humidity || next.humidity || 0,
+        weatherIcon: getWeatherIcon(prev.weather || []),
       };
     }
     const fraction = (targetTime - prev.dt) / (next.dt - prev.dt);
@@ -66,8 +69,31 @@ export function setupWeatherForecast(
       time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
       temp: Math.round(prev.temp + (next.temp - prev.temp) * fraction),
       humidity: Math.round(prev.humidity + (next.humidity - prev.humidity) * fraction),
+      weatherIcon: getWeatherIcon(prev.weather || []),
     };
   };
+
+// Add weather icon mapping function
+const getWeatherIcon = (weather: { id: number; main: string }[]): string => {
+  if (!weather || weather.length === 0) {
+    // Invalid data - random Meteor or Dragon
+    return Math.random() < 0.5 ? '<i class="fa-solid fa-meteor"></i>' : '<i class="fa-solid fa-dragon"></i>';
+  }
+  const condition = weather[0]; // Use the first weather condition
+  const id = condition.id;
+  const main = condition.main.toLowerCase();
+
+  if (id === 800) return '<i class="fa-solid fa-sun"></i>'; // Clear / Sunny
+  if (id >= 801 && id <= 804) return '<i class="fa-solid fa-cloud"></i>'; // Cloudy
+  if (main.includes('rain')) return '<i class="fa-solid fa-cloud-showers-heavy"></i>'; // Rainy
+  if (main.includes('snow')) return '<i class="fa-solid fa-snowflake"></i>'; // Snowy
+  if (main.includes('thunderstorm') || main.includes('lightning')) return '<i class="fa-solid fa-bolt-lightning"></i>'; // Lightning
+  if (main.includes('wind')) return '<i class="fa-solid fa-wind"></i>'; // Windy
+  if (main.includes('tornado')) return '<i class="fa-solid fa-tornado"></i>'; // Tornado
+  if (main.includes('tsunami')) return '<i class="fa-solid fa-tornado"></i>'; // Tsunami (using tornado icon as proxy)
+  if (main.includes('hurricane')) return '<i class="fa-solid fa-hurricane"></i>'; // Hurricane
+  return '<i class="fa-solid fa-cloud"></i>'; // Default to Cloudy if unknown
+};
 
   const formatTwoDigits = (value: number): string => {
     return Number.isFinite(value) ? Math.round(value).toString().padStart(2, '0') : 'N/A';
@@ -102,7 +128,12 @@ export function setupWeatherForecast(
         const now = new Date();
         const nowUnix = Math.floor(now.getTime() / 1000);
         const twelveHoursLater = nowUnix + 12 * 3600;
-        const forecastItems: ForecastItem[] = [{ time: 'Now', temp: currentTemp, humidity: currentHumidity }];
+        const forecastItems: ForecastItem[] = [{
+          time: 'Now',
+          temp: currentTemp,
+          humidity: currentHumidity,
+          weatherIcon: getWeatherIcon(current.weather || [])
+        }];
 
         const apiPoints = (forecast.list || [])
           .filter(
@@ -129,6 +160,7 @@ export function setupWeatherForecast(
               time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
               temp: currentTemp,
               humidity: currentHumidity,
+              weatherIcon: getWeatherIcon(prevPoint?.weather || []),
             });
             continue;
           }
@@ -138,12 +170,13 @@ export function setupWeatherForecast(
               time: new Date(prevPoint.dt * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
               temp: prevPoint.main.temp + tempAdjustment,
               humidity: prevPoint.main.humidity,
+              weatherIcon: getWeatherIcon(prevPoint.weather || []),
             });
           } else {
             const interpolated = interpolateHour(
               targetTime,
-              { dt: prevPoint.dt, temp: prevPoint.main.temp + tempAdjustment, humidity: prevPoint.main.humidity },
-              { dt: nextPoint.dt, temp: nextPoint.main.temp + tempAdjustment, humidity: nextPoint.main.humidity }
+              { dt: prevPoint.dt, temp: prevPoint.main.temp + tempAdjustment, humidity: prevPoint.main.humidity, weather: prevPoint.weather },
+              { dt: nextPoint.dt, temp: nextPoint.main.temp + tempAdjustment, humidity: nextPoint.main.humidity, weather: nextPoint.weather }
             );
             forecastItems.push(interpolated);
           }
@@ -173,7 +206,7 @@ export function setupWeatherForecast(
           }
         }
 
-        // Render UI
+        // Render UI with weather icons
         container.innerHTML = `
           <p class="forecast-summary">${forecastSummary}</p>
           <div class="forecast-well">
@@ -182,6 +215,7 @@ export function setupWeatherForecast(
                 (item) => `
                 <div class="forecast-box">
                   <span class="time">${item.time}</span>
+                  <span class="weather-icon">${item.weatherIcon}</span>
                   <span class="temp" style="color: ${getTempColor(item.temp)};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(item.temp)}°F</span>
                   <span class="humidity" style="color: ${getHumidityColor(item.humidity)};"><i class="fa-solid fa-droplet"></i> ${formatTwoDigits(item.humidity)}%</span>
                 </div>

@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator) {
 
 // Define interfaces for component return types
 interface WeatherDisplayComponent {
-  checkSafety: (temp: number, humidity: number) => { status: string; reason: string };
+  checkSafety: (temp: number) => { status: string; reason: string };
   getTempColor: (temp: number) => string;
   getHumidityColor: (temp: number) => string;
   currentStatus: string;
@@ -75,7 +75,7 @@ const renderApp = () => {
     const forecastComponent: ForecastComponent = setupWeatherForecast(
       forecastContainer,
       weatherService,
-      (temp: number, humidity: number) => ({ status: 'not-safe', reason: 'Placeholder' }),
+      (temp: number) => ({ status: 'not-safe', reason: 'Placeholder' }),
       (temp: number) => '#888888',
       (humidity: number) => '#888888',
       parkingComponent
