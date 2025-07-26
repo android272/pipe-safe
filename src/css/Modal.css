@@ -29,16 +29,24 @@
     box-shadow: var(--shadow-outset);
     transform: translateY(20px);
     transition: transform 0.3s ease-in-out;
+    max-height: 80vh; /* Limit height to 80% of viewport height */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .modal.active .modal-content {
     transform: translateY(0);
 }
 
-.modal-content h2,
-.modal-content h3 {
+.modal-content h2 {
     margin-top: 0;
     font-size: 1.8rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
     color: var(--text-color);
     font-weight: 600;
 }
@@ -88,4 +96,22 @@
     margin: 15px 0;
     color: var(--text-color);
     font-size: 1rem;
+}
+
+/* Optional: Style the scrollbar for a better look */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
 }

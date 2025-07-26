@@ -9,7 +9,13 @@ export function setupInfoModal(container: HTMLElement) {
         <h1>About PipeSafe</h1>
         <p class="info-text">PipeSafe helps you determine if it’s safe to leave pipes, tobacco, or cigars in your car for up to 12 hours based on temperature.</p>
         <h2>Temperature</h2>
-        <p class="info-text">Pipes, pipe tobacco, and cigars are sensitive to temperature extremes. Ideally, keep them between 59-70°F. High temperatures (>70°F) can dry out tobacco and cigars, affecting flavor, or cause pipes to warp or crack. Low temperatures (<59°F) may make pipes brittle or dry out tobacco and cigars, impacting quality.</p>
+        <p class="info-text">Pipes, pipe tobacco, and cigars are sensitive to temperature extremes.</p>
+        <h3>Pipes</h3>
+        <p class="info-text"><b>Above 70°F:</b> Warping, cracking, or bleaching (if exposed to sunlight). <b>Below 64°F:</b> Brittleness, potential cracking.</p>
+        <h3>Pipe Tobacco</h3>
+        <p class="info-text"><b>Above 70°F:</b> Drying out, flavor loss. <b>Below 59°F:</b> Excessive drying, reduced quality.</p>
+        <h3>Cigars</h3>
+        <p class="info-text"><b>Above 70°F:</b> Drying out, flavor loss, risk of cigar beetle hatching. <b>Below 64°F:</b> Drying, wrapper cracking.</p>
         <h2>Humidity</h2>
         <p class="info-text">Humidity is not a major concern for short-term car storage (up to 12 hours) and is not factored into PipeSafe’s safety calculations. For long-term storage, consider humidity to prevent drying or excess moisture.</p>
         <h2>Car</h2>
