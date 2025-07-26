@@ -58,7 +58,7 @@ body {
 
 h1 {
     color: var(--text-color);
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -210,15 +210,16 @@ select:focus {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 30px;
+    gap: 15px;
     margin-bottom: 20px;
-    padding: 20px;
+    padding: 15px;
     background: var(--secondary-bg);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     box-shadow: var(--shadow-inset);
     flex: 1 0 auto;
 }
+
 
 .main-content {
     flex: 1 0 auto;
@@ -237,7 +238,7 @@ select:focus {
 }
 
 .weather-item .value {
-    font-size: 2.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-color);
     display: flex;
@@ -248,11 +249,11 @@ select:focus {
 
 .weather-item .value i {
     margin-right: 10px;
-    font-size: 1.8rem;
+    font-size: 2rem;
 }
 
 .safety-image {
-    max-width: 300px;
+    max-width: 250px;
     height: auto;
     margin: 20px auto;
     display: block;
@@ -277,28 +278,4 @@ select:focus {
     color: var(--warning-color);
     margin: 10px 0;
     font-weight: 500;
-}
-
-@media (max-width: 768px) {
-    #app {
-        padding: 1rem;
-    }
-
-    h1 {
-        font-size: 2rem;
-    }
-
-    .current-weather {
-        flex-direction: row;
-        gap: 15px;
-        padding: 15px;
-    }
-
-    .weather-item .value {
-        font-size: 2rem;
-    }
-
-    .safety-image {
-        max-width: 250px;
-    }
 }
