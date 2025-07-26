@@ -6,7 +6,6 @@ export function setupSettingsModal(container: HTMLElement) {
     const settings = savedSettings
         ? JSON.parse(savedSettings)
         : {
-            humidityThreshold: 80,
             carTempIncrease: 0, // Default to +0°F
         };
     console.log('SettingsModal: Loaded settings:', settings);
@@ -18,20 +17,12 @@ export function setupSettingsModal(container: HTMLElement) {
         <div class="modal-content">
             <h2>Settings</h2>
             <div class="settings-group">
-                <h3>Humidity Threshold</h3>
-                <div class="radio-group">
-                    <label><input type="radio" name="humidity-threshold" value="80" ${settings.humidityThreshold === 80 ? 'checked' : ''}> 80%</label>
-                    <label><input type="radio" name="humidity-threshold" value="85" ${settings.humidityThreshold === 85 ? 'checked' : ''}> 85%</label>
-                    <label><input type="radio" name="humidity-threshold" value="90" ${settings.humidityThreshold === 90 ? 'checked' : ''}> 90%</label>
-                    <label><input type="radio" name="humidity-threshold" value="95" ${settings.humidityThreshold === 95 ? 'checked' : ''}> 95%</label>
-                </div>
-            </div>
-            <div class="settings-group">
                 <h3>Car Temperature</h3>
                 <div class="radio-group">
                     <label><input type="radio" name="car-temp-increase" value="0" ${settings.carTempIncrease === 0 ? 'checked' : ''}> +0°F</label>
                     <label><input type="radio" name="car-temp-increase" value="10" ${settings.carTempIncrease === 10 ? 'checked' : ''}> +10°F</label>
                     <label><input type="radio" name="car-temp-increase" value="20" ${settings.carTempIncrease === 20 ? 'checked' : ''}> +20°F</label>
+                    <label><input type="radio" name="car-temp-increase" value="40" ${settings.carTempIncrease === 40 ? 'checked' : ''}> +40°F</label> <!-- New option -->
                 </div>
             </div>
             <button id="save-settings">Save</button>
@@ -72,15 +63,11 @@ export function setupSettingsModal(container: HTMLElement) {
 
     // Save settings
     saveButton.addEventListener('click', () => {
-        const humidityThreshold = parseInt(
-            (container.querySelector('input[name="humidity-threshold"]:checked') as HTMLInputElement)?.value || '80'
-        );
         const carTempIncrease = parseInt(
             (container.querySelector('input[name="car-temp-increase"]:checked') as HTMLInputElement)?.value || '0'
         );
 
         const newSettings = {
-            humidityThreshold,
             carTempIncrease,
         };
 
