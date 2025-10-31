@@ -38,7 +38,7 @@ Welcome to **PipeSafe**, a web application that helps you determine if it's safe
 
 
 ### Deployment
-This project is hosted on GitHub Pages at https://github.com/android272/pipe-safe/. To deploy your own version:
+This project is hosted on GitHub Pages at [https://android272.github.io/pipe-safe/](https://android272.github.io/pipe-safe). To deploy your own version:
 
 - Follow the build steps above.
 - Run npm run deploy to push to the gh-pages branch.
