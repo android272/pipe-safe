@@ -26,6 +26,11 @@ interface WeatherDisplayComponent {
 
 interface ForecastComponent {
     updateForecast: (currentTemp: number, currentHumidity: number, isCurrentlySafe: boolean, currentStatus: string) => void;
+    setSafetyFns: (
+        checkSafety: (temp: number) => { status: string },
+        getTempColor: (temp: number) => string,
+        getHumidityColor: (humidity: number) => string,
+    ) => void;
 }
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -67,7 +72,7 @@ const renderApp = () => {
             return;
         }
 
-        const weatherService = setupWeatherService(apiKey, true);
+        const weatherService = setupWeatherService(apiKey, false);
         const weatherContainer = document.querySelector<HTMLDivElement>('#weather-container')!;
         const forecastContainer = document.querySelector<HTMLDivElement>('#weather-forecast-container')!;
 
@@ -90,14 +95,11 @@ const renderApp = () => {
             forecastComponent
         );
 
-        console.log('main.ts: Updating weather forecast with display functions');
-        setupWeatherForecast(
-            forecastContainer,
-            weatherService,
+        // Swap in the real safety functions before the first forecast render resolves.
+        forecastComponent.setSafetyFns(
             weatherDisplay.checkSafety,
             weatherDisplay.getTempColor,
             weatherDisplay.getHumidityColor,
-            parkingComponent
         );
     } else {
         app.innerHTML = `

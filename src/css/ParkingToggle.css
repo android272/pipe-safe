@@ -18,6 +18,16 @@
     cursor: pointer;
 }
 
+.parking-toggle-container.night {
+    cursor: default;
+}
+
+.parking-toggle-container.night .parking-option.open,
+.parking-toggle-container.night .parking-toggle label {
+    opacity: 0.4;
+    cursor: default;
+}
+
 .parking-option {
     display: flex;
     flex-direction: column;
@@ -114,4 +124,8 @@
     color: var(--warning-color);
     text-align: center;
     font-weight: 500;
+}
+
+.car-warning.night {
+    color: var(--text-color);
 }

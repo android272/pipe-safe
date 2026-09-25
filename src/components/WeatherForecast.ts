@@ -1,13 +1,22 @@
 import '../css/WeatherForecast.css';
+import { formatLocationTime, isDaytime, safeUntilText, sunOffsetF } from './solar';
 
 interface ForecastData {
     cod: number | string;
+    city?: { sunrise?: number; sunset?: number; timezone?: number };
     list: Array<{
         dt: number;
         main: { temp: number; humidity: number };
         dt_txt: string;
-        weather: { id: number; main: string }[]; // Add weather array
+        weather: { id: number; main: string }[];
     }>;
+}
+
+interface CurrentWeather {
+    dt?: number;
+    timezone?: number;
+    weather?: { id: number; main: string }[];
+    sys?: { sunrise?: number; sunset?: number };
 }
 
 interface Settings {
@@ -30,7 +39,9 @@ export function setupWeatherForecast(
     getHumidityColor: (humidity: number) => string,
     parkingComponent: { getParkingCondition: () => string }
 ) {
-    const testMode = true;
+    let safetyCheck = checkSafety;
+    let tempColor = getTempColor;
+    let humidityColor = getHumidityColor;
     let lastCurrentTemp = 0;
     let lastCurrentHumidity = 0;
     let lastIsCurrentlySafe = false;
@@ -45,36 +56,22 @@ export function setupWeatherForecast(
         };
     }
 
-    const interpolateHour = (
-        targetTime: number,
-        prev: { dt: number; temp: number; humidity: number; weather?: { id: number; main: string }[] },
-        next: { dt: number; temp: number; humidity: number; weather?: { id: number; main: string }[] }
-    ): ForecastItem => {
-        if (
-            !Number.isFinite(prev.temp) ||
-            !Number.isFinite(next.temp) ||
-            !Number.isFinite(prev.humidity) ||
-            !Number.isFinite(next.humidity) ||
-            prev.dt >= next.dt
-        ) {
-            return {
-                time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
-                temp: prev.temp || next.temp || 0,
-                humidity: prev.humidity || next.humidity || 0,
-                weatherIcon: getWeatherIcon(prev.weather || [], targetTime),
-            };
+    const blend = (targetTime: number, prevValue: number, prevDt: number, nextValue: number, nextDt: number): number => {
+        if (!Number.isFinite(prevValue) || !Number.isFinite(nextValue) || prevDt >= nextDt) {
+            return Number.isFinite(prevValue) ? prevValue : nextValue;
         }
-        const fraction = (targetTime - prev.dt) / (next.dt - prev.dt);
-        return {
-            time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
-            temp: Math.round(prev.temp + (next.temp - prev.temp) * fraction),
-            humidity: Math.round(prev.humidity + (next.humidity - prev.humidity) * fraction),
-            weatherIcon: getWeatherIcon(prev.weather || [], targetTime),
-        };
+        const fraction = (targetTime - prevDt) / (nextDt - prevDt);
+        return prevValue + (nextValue - prevValue) * fraction;
     };
 
-    // Update weather icon mapping function with time check
-    const getWeatherIcon = (weather: { id: number; main: string }[], timestamp: number): string => {
+    // Clear sky uses sunrise/sunset at the weather location, not a fixed clock.
+    const getWeatherIcon = (
+        weather: { id: number; main: string }[],
+        timestamp: number,
+        sunrise?: number,
+        sunset?: number,
+        timezone?: number,
+    ): string => {
         if (!weather || weather.length === 0) {
             // Invalid data - random Meteor or Dragon
             return Math.random() < 0.5 ? '<i class="fa-solid fa-meteor"></i>' : '<i class="fa-solid fa-dragon"></i>';
@@ -82,15 +79,11 @@ export function setupWeatherForecast(
         const condition = weather[0];
         const id = condition.id;
         const main = condition.main.toLowerCase();
-        const date = new Date(timestamp * 1000);
-        const hour = date.getUTCHours(); // Use UTC to match API time (adjust if local time is needed)
 
-        // Check for Clear/Sunny (id 800) and nighttime (8 PM to 5 AM)
         if (id === 800) {
-            if (hour >= 20 || hour < 10) { // 8 PM to 5 AM
-                return '<i class="fa-solid fa-moon"></i>';
-            }
-            return '<i class="fa-solid fa-sun"></i>';
+            return isDaytime(timestamp, sunrise, sunset, timezone)
+                ? '<i class="fa-solid fa-sun"></i>'
+                : '<i class="fa-solid fa-moon"></i>';
         }
         if (id >= 801 && id <= 804) return '<i class="fa-solid fa-cloud"></i>'; // Cloudy
         if (main.includes('rain')) return '<i class="fa-solid fa-cloud-showers-heavy"></i>'; // Rainy
@@ -116,42 +109,41 @@ export function setupWeatherForecast(
 
         weatherService
             .fetchWeatherData()
-            .then(([current, forecast]: [any, ForecastData]) => {
+            .then(([current, forecast]: [CurrentWeather, ForecastData]) => {
                 console.log('WeatherForecast: Forecast fetched:', forecast);
-                if (!testMode && forecast.cod !== '200') {
+                if (String(forecast.cod) !== '200') {
                     container.innerHTML = '<p>Error: Invalid forecast response.</p>';
                     return;
                 }
 
                 console.log('WeatherForecast: Loaded settings:', settings);
                 const parkingCondition = parkingComponent.getParkingCondition();
-                console.log('WeatherForecast: Applying parking condition:', parkingCondition);
-                let tempAdjustment = settings.carTempIncrease;
-                if (parkingCondition === 'shade') {
-                    tempAdjustment -= 5;
-                }
-                console.log('WeatherForecast: Temperature adjustment:', tempAdjustment);
+                const sunrise = current.sys?.sunrise ?? forecast.city?.sunrise;
+                const sunset = current.sys?.sunset ?? forecast.city?.sunset;
+                const timezone = current.timezone ?? forecast.city?.timezone;
+                const hourLabel = (unix: number) => formatLocationTime(unix, timezone, false);
+                const clockLabel = (unix: number) => formatLocationTime(unix, timezone, true);
 
-                // Forecast (12 hours)
-                const now = new Date();
-                const nowUnix = Math.floor(now.getTime() / 1000);
+                // "Now" is the estimated interior from WeatherDisplay. Later hours add the
+                // sun offset only when that hour is daytime and the car is In Open.
+                const nowUnix = Math.floor(Date.now() / 1000);
                 const twelveHoursLater = nowUnix + 12 * 3600;
                 const forecastItems: ForecastItem[] = [{
                     time: 'Now',
                     temp: currentTemp,
                     humidity: currentHumidity,
-                    weatherIcon: getWeatherIcon(current.weather || [], nowUnix),
+                    weatherIcon: getWeatherIcon(current.weather || [], current.dt ?? nowUnix, sunrise, sunset, timezone),
                 }];
 
-                const apiPoints = (forecast.list || [])
-                    .filter(
-                        (item) =>
-                            item.dt >= nowUnix &&
-                            item.dt <= twelveHoursLater + 3600 &&
-                            Number.isFinite(item.main?.temp) &&
-                            Number.isFinite(item.main?.humidity)
-                    )
-                    .slice(0, 7);
+                const validPoints = (forecast.list || []).filter(
+                    (item) =>
+                        item.dt <= twelveHoursLater + 3600 &&
+                        Number.isFinite(item.main?.temp) &&
+                        Number.isFinite(item.main?.humidity),
+                );
+                const anchor = validPoints.filter((item) => item.dt < nowUnix).slice(-1);
+                const ahead = validPoints.filter((item) => item.dt >= nowUnix).slice(0, 8);
+                const apiPoints = [...anchor, ...ahead];
 
                 if (apiPoints.length < 1) {
                     container.innerHTML = '<p>Error: No valid forecast data.</p>';
@@ -163,56 +155,33 @@ export function setupWeatherForecast(
                     const prevPoint = apiPoints.slice().reverse().find((p) => p.dt <= targetTime) || apiPoints[0];
                     const nextPoint = apiPoints.find((p) => p.dt >= targetTime) || apiPoints[apiPoints.length - 1];
 
-                    if (!prevPoint || !nextPoint) {
-                        forecastItems.push({
-                            time: new Date(targetTime * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
-                            temp: currentTemp,
-                            humidity: currentHumidity,
-                            weatherIcon: getWeatherIcon(prevPoint?.weather || [], targetTime),
-                        });
-                        continue;
-                    }
-
-                    if (prevPoint.dt === targetTime || Math.abs(prevPoint.dt - targetTime) < 300) {
-                        forecastItems.push({
-                            time: new Date(prevPoint.dt * 1000).toLocaleTimeString([], { hour: 'numeric', hour12: true }),
-                            temp: prevPoint.main.temp + tempAdjustment,
-                            humidity: prevPoint.main.humidity,
-                            weatherIcon: getWeatherIcon(prevPoint.weather || [], prevPoint.dt),
-                        });
-                    } else {
-                        const interpolated = interpolateHour(
-                            targetTime,
-                            { dt: prevPoint.dt, temp: prevPoint.main.temp + tempAdjustment, humidity: prevPoint.main.humidity, weather: prevPoint.weather },
-                            { dt: nextPoint.dt, temp: nextPoint.main.temp + tempAdjustment, humidity: nextPoint.main.humidity, weather: nextPoint.weather }
-                        );
-                        forecastItems.push(interpolated);
-                    }
+                    const outside = (prevPoint.dt === targetTime || Math.abs(prevPoint.dt - targetTime) < 300)
+                        ? prevPoint.main.temp
+                        : blend(targetTime, prevPoint.main.temp, prevPoint.dt, nextPoint.main.temp, nextPoint.dt);
+                    const humidity = (prevPoint.dt === targetTime || Math.abs(prevPoint.dt - targetTime) < 300)
+                        ? prevPoint.main.humidity
+                        : blend(targetTime, prevPoint.main.humidity, prevPoint.dt, nextPoint.main.humidity, nextPoint.dt);
+                    const daytime = isDaytime(targetTime, sunrise, sunset, timezone);
+                    const interior = outside + sunOffsetF(settings.carTempIncrease, parkingCondition, daytime);
+                    forecastItems.push({
+                        time: hourLabel(targetTime),
+                        temp: interior,
+                        humidity,
+                        weatherIcon: getWeatherIcon(prevPoint.weather || nextPoint.weather || [], targetTime, sunrise, sunset, timezone),
+                    });
                 }
 
-                // Calculate forecast summary
-                let forecastSummary = "";
-                const allSameStatus = forecastItems.slice(1).every((item) => {
-                    const itemStatus = checkSafety(item.temp).status;
-                    return itemStatus === (isCurrentlySafe ? currentStatus : 'not-safe');
-                });
-
-                if (allSameStatus) {
-                    forecastSummary = isCurrentlySafe ? 'Safe all day!' : 'Not safe all day!';
-                } else {
-                    for (let i = 1; i < forecastItems.length; i++) {
-                        const item = forecastItems[i];
-                        const itemStatus = checkSafety(item.temp).status;
-                        const isItemSafe = itemStatus === 'safe' || itemStatus === 'warning';
-                        if (isItemSafe !== isCurrentlySafe) {
-                            const changeTime = new Date(nowUnix * 1000 + i * 3600);
-                            forecastSummary = isCurrentlySafe
-                                ? `Safe until ${changeTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
-                                : `Not safe until ${changeTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
-                            break;
-                        }
-                    }
-                }
+                const future = forecastItems.slice(1).map((item, index) => ({
+                    at: nowUnix + (index + 1) * 3600,
+                    interior: item.temp,
+                }));
+                const forecastSummary = safeUntilText(
+                    currentTemp,
+                    future,
+                    nowUnix,
+                    clockLabel,
+                    (interior) => safetyCheck(interior).status === 'not-safe',
+                );
 
                 // Render UI with weather icons
                 container.innerHTML = `
@@ -224,8 +193,8 @@ export function setupWeatherForecast(
                 <div class="forecast-box">
                   <span class="time">${item.time}</span>
                   <span class="weather-icon">${item.weatherIcon}</span>
-                  <span class="temp" style="color: ${getTempColor(item.temp)};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(item.temp)}°F</span>
-                  <span class="humidity" style="color: ${getHumidityColor(item.humidity)};"><i class="fa-solid fa-droplet"></i> ${formatTwoDigits(item.humidity)}%</span>
+                  <span class="temp" style="color: ${tempColor(item.temp)};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(item.temp)}°F</span>
+                  <span class="humidity" style="color: ${humidityColor(item.humidity)};"><i class="fa-solid fa-droplet"></i> ${formatTwoDigits(item.humidity)}%</span>
                 </div>
               `
                         )
@@ -239,18 +208,22 @@ export function setupWeatherForecast(
             });
     };
 
-    // Listen for parking changes
-    document.addEventListener("parking-changed", (e: Event) => {
-        console.log("WeatherForecast: Parking changed event received:", (e as CustomEvent).detail.parkingCondition);
-        updateForecast(lastCurrentTemp, lastCurrentHumidity, lastIsCurrentlySafe, lastCurrentStatus);
-    });
-
-    // Listen for settings changes
+    // WeatherDisplay refetches and calls updateForecast. Keep settings in sync first.
     document.addEventListener("settings-changed", (e: Event) => {
         settings = (e as CustomEvent).detail.settings;
         console.log('WeatherForecast: Settings changed, new settings:', settings);
-        updateForecast(lastCurrentTemp, lastCurrentHumidity, lastIsCurrentlySafe, lastCurrentStatus);
     });
 
-    return { updateForecast };
+    return {
+        updateForecast,
+        setSafetyFns(
+            nextCheck: (temp: number) => { status: string },
+            nextTempColor: (temp: number) => string,
+            nextHumidityColor: (humidity: number) => string,
+        ) {
+            safetyCheck = nextCheck;
+            tempColor = nextTempColor;
+            humidityColor = nextHumidityColor;
+        },
+    };
 }

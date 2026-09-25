@@ -252,6 +252,13 @@ select:focus {
     font-size: 2rem;
 }
 
+.weather-item .value .sun-offset {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-left: 0.4rem;
+    white-space: nowrap;
+}
+
 .safety-image {
     max-width: 250px;
     height: auto;

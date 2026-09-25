@@ -51,6 +51,13 @@
     font-weight: 600;
 }
 
+.modal-content .settings-note {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin: 8px 0 0;
+}
+
 .modal-content .settings-group,
 .modal-content .radio-group,
 .modal-content .car-temp-options {

@@ -1,6 +1,11 @@
+import { formatLocationTime, interiorTempColor, interiorVerdict, isDaytime, sunOffsetF } from './solar';
+
 interface WeatherData {
     cod: number | string;
+    dt?: number;
+    timezone?: number;
     main: { temp: number; humidity: number };
+    sys?: { sunrise?: number; sunset?: number };
 }
 
 interface ForecastData {
@@ -37,37 +42,21 @@ export function setupWeatherDisplay(
             };
     }
 
-    const checkSafety = (temp: number): { status: string; reason: string } => {
-        if (!Number.isFinite(temp)) {
-            return { status: 'not-safe', reason: 'Invalid data' };
-        }
-
-        const roundedTemp = Math.round(temp);
-        if (roundedTemp < 50) return { status: 'not-safe', reason: `Too cold: ${roundedTemp}°F` };
-        if (roundedTemp >= 90) return { status: 'not-safe', reason: `Too hot: ${roundedTemp}°F` };
-        if (roundedTemp >= 75 && roundedTemp <= 90) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
-        if (roundedTemp >= 50 && roundedTemp <= 65) return { status: 'warning', reason: 'Temperature near unsafe threshold' };
-        return { status: 'safe', reason: 'Conditions ideal' };
-    };
+    const checkSafety = (temp: number): { status: string; reason: string } => interiorVerdict(temp);
 
     const formatTwoDigits = (value: number): string => {
         return Number.isFinite(value) ? Math.round(value).toString().padStart(2, '0') : 'N/A';
     };
 
-    const getTempColor = (temp: number): string => {
-        if (!Number.isFinite(temp)) return '#888888';
-        const roundedTemp = Math.round(temp);
-        const clampedTemp = Math.min(Math.max(roundedTemp, 50), 85);
-        const hue = 200 - ((clampedTemp - 50) / (85 - 50)) * 200;
-        return `hsl(${hue}, 70%, 60%)`;
-    };
+    const getTempColor = (temp: number): string => interiorTempColor(temp);
 
     const getHumidityColor = (humidity: number): string => {
         if (!Number.isFinite(humidity)) return '#888888';
         const roundedHumidity = Math.round(humidity);
-        const clampedHumidity = Math.min(Math.max(roundedHumidity, 50), settings.humidityThreshold);
-        const saturation = 30 + ((clampedHumidity - 50) / (settings.humidityThreshold - 50)) * 40;
-        const lightness = 80 - ((clampedHumidity - 50) / (settings.humidityThreshold - 50)) * 40;
+        const threshold = Number.isFinite(settings.humidityThreshold) ? settings.humidityThreshold : 80;
+        const clampedHumidity = Math.min(Math.max(roundedHumidity, 50), threshold);
+        const saturation = 30 + ((clampedHumidity - 50) / (threshold - 50)) * 40;
+        const lightness = 80 - ((clampedHumidity - 50) / (threshold - 50)) * 40;
         return `hsl(200, ${saturation}%, ${lightness}%)`;
     };
 
@@ -77,21 +66,24 @@ export function setupWeatherDisplay(
             .fetchWeatherData()
             .then(([current]: [WeatherData, ForecastData]) => {
                 console.log('WeatherDisplay: Current:', current);
-                if (!testMode && current.cod !== 200) {
+                if (!testMode && String(current.cod) !== '200') {
                     container.innerHTML = '<p>Error: Invalid API response.</p>';
                     return;
                 }
 
                 const parkingCondition = parkingComponent.getParkingCondition();
-                console.log('WeatherDisplay: Applying parking condition:', parkingCondition);
-                let tempAdjustment = settings.carTempIncrease;
-                if (parkingCondition === 'shade') {
-                    tempAdjustment -= 5;
-                }
-                console.log('WeatherDisplay: Temperature adjustment:', tempAdjustment);
-                const currentTemp = Number.isFinite(current.main?.temp) ? current.main.temp + tempAdjustment : NaN;
+                const observedAt = Number.isFinite(current.dt) ? current.dt as number : Math.floor(Date.now() / 1000);
+                const sunrise = current.sys?.sunrise;
+                const sunset = current.sys?.sunset;
+                const timezone = current.timezone;
+                const daytime = isDaytime(observedAt, sunrise, sunset, timezone);
+                // main.temp is already °F (units=imperial). Sun offset is the only add-on.
+                const sunOffset = sunOffsetF(settings.carTempIncrease, parkingCondition, daytime);
+                const outsideTemp = current.main?.temp;
+                const currentTemp = Number.isFinite(outsideTemp) ? outsideTemp + sunOffset : NaN;
+                console.log('WeatherDisplay: outside', outsideTemp, 'sunOffset', sunOffset, 'daytime', daytime, 'local', formatLocationTime(observedAt, timezone));
+                document.dispatchEvent(new CustomEvent('solar-updated', { detail: { sunrise, sunset, timezone } }));
                 const currentHumidity = Number.isFinite(current.main?.humidity) ? current.main.humidity : NaN;
-                console.log('WeatherDisplay: Current temp after adjustment:', currentTemp);
                 const { status, reason } = checkSafety(currentTemp);
                 currentStatus = status;
                 const tempColor = getTempColor(currentTemp);
@@ -116,8 +108,8 @@ export function setupWeatherDisplay(
           ` : ''}
           <div class="current-weather">
             <div class="weather-item">
-              <span class="label">Temperature</span>
-              <span class="value" style="color: ${tempColor};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(currentTemp)}°F</span>
+              <span class="label">Est. car interior</span>
+              <span class="value" style="color: ${tempColor};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(currentTemp)}°F${sunOffset > 0 ? `<span class="sun-offset">(+${sunOffset}°F sun)</span>` : ''}</span>
             </div>
             <div class="weather-item">
               <span class="label">Humidity</span>

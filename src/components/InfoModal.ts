@@ -25,7 +25,7 @@ export function setupInfoModal(container: HTMLElement) {
         <p class="info-text">Humidity is not a major concern for short-term car storage (up to 12 hours) and is not factored into PipeSafe’s safety calculations. For long-term storage, consider humidity to prevent drying or excess moisture.</p>
         
         <h2>Car</h2>
-        <p class="info-text">Cars heat up quickly, with interior temperatures rising 20-40°F above outside conditions in sunlight. Park in the shade and use sunshades to keep temperatures closer to safe ranges. Use sturdy, vented containers to avoid pressure buildup in warm conditions.</p>
+        <p class="info-text">Full sun can raise a closed cabin about 20–40°F above the outside temperature. Shade stays much closer to the outside air. The Car Temperature setting (+0, +10, +20, or +40°F) is a sun offset: it is added only in daytime when the car is In Open. After sunset that offset is not applied. Park in the shade or use a sunshade, and use a sturdy vented container so warm air does not build pressure.</p>
         
         <button id="close-info">Close</button>
       </div>

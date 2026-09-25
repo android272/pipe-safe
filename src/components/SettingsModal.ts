@@ -18,6 +18,7 @@ export function setupSettingsModal(container: HTMLElement) {
             <h2>Settings</h2>
             <div class="settings-group">
                 <h3>Car Temperature</h3>
+                <p class="settings-note">Sun offset for daytime In Open only. Not added in shade or at night.</p>
                 <div class="radio-group">
                     <label><input type="radio" name="car-temp-increase" value="0" ${settings.carTempIncrease === 0 ? 'checked' : ''}> +0°F</label>
                     <label><input type="radio" name="car-temp-increase" value="10" ${settings.carTempIncrease === 10 ? 'checked' : ''}> +10°F</label>
