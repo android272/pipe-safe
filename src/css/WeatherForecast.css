@@ -60,7 +60,37 @@
 }
 
 .forecast-box .temp i,
-.forecast-box .humidity i {
+.forecast-box .humidity i,
+.forecast-box .wind i {
     margin-right: 8px;
     font-size: 1rem;
+}
+
+.forecast-box .wind {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.forecast-box .wind.wind-amber {
+    color: #9A6B12;
+}
+
+.forecast-box .wind.wind-strong {
+    color: #A85A00;
+}
+
+@media (prefers-color-scheme: dark) {
+    .forecast-box .wind.wind-amber {
+        color: #E0B15A;
+    }
+
+    .forecast-box .wind.wind-strong {
+        color: #F0A04A;
+    }
 }

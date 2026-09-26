@@ -110,7 +110,8 @@ export function setupWeatherService(apiKey: string, testMode: boolean) {
             return Promise.resolve([scenario.current, scenario.forecast]);
         }
 
-        // Check cache
+        // Check cache. A stale copy is kept so a failed refresh does not invent 0 mph wind.
+        let staleCache: WeatherCache | null = null;
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
             const cache: WeatherCache = JSON.parse(cached);
@@ -119,6 +120,7 @@ export function setupWeatherService(apiKey: string, testMode: boolean) {
                 console.log("Using cached weather data:", cache); // Debug
                 return [cache.current, cache.forecast];
             }
+            staleCache = cache;
         }
 
         // Fetch new data
@@ -143,6 +145,10 @@ export function setupWeatherService(apiKey: string, testMode: boolean) {
             console.log("Fetched and cached new weather data:", cache); // Debug
             return [currentResponse, forecastResponse];
         } catch (error) {
+            if (staleCache) {
+                console.log("Fetch failed, using last cached weather:", staleCache);
+                return [staleCache.current, staleCache.forecast];
+            }
             console.error("Fetch error:", error);
             throw error;
         }

@@ -1,4 +1,5 @@
 import { formatLocationTime, interiorTempColor, interiorVerdict, isDaytime, sunOffsetF } from './solar';
+import { LIGHTING_LABEL, finiteWind, lightingAria, lightingDetail, lightingLevel, windAria } from './wind';
 
 interface WeatherData {
     cod: number | string;
@@ -6,6 +7,7 @@ interface WeatherData {
     timezone?: number;
     main: { temp: number; humidity: number };
     sys?: { sunrise?: number; sunset?: number };
+    wind?: { speed?: number; gust?: number };
 }
 
 interface ForecastData {
@@ -88,6 +90,23 @@ export function setupWeatherDisplay(
                 currentStatus = status;
                 const tempColor = getTempColor(currentTemp);
                 const humidityColor = getHumidityColor(currentHumidity);
+                const lighting = lightingLevel(finiteWind(current.wind?.speed), finiteWind(current.wind?.gust));
+                const lightingNote = lighting ? lightingDetail(lighting) : null;
+                const windColumn = lighting ? `
+            <div class="weather-item wind-item">
+              <span class="sr-only">${windAria(lighting.speed, lighting.gust)}</span>
+              <span class="label" aria-hidden="true">Wind</span>
+              <span class="value lighting-${lighting.level}" aria-hidden="true">
+                <span class="wind-line"><i class="fa-solid fa-wind"></i> ${Math.round(lighting.speed)} mph</span>
+                ${lighting.gust != null && lighting.gust > lighting.speed ? `<span class="wind-gust">gusts ${Math.round(lighting.gust)}</span>` : ''}
+              </span>
+            </div>` : '';
+                const lightingRow = lighting ? `
+          <p class="lighting lighting-${lighting.level}">
+            <span class="sr-only">${lightingAria(lighting.level)}</span>
+            <span aria-hidden="true">Lighting: ${LIGHTING_LABEL[lighting.level]}</span>
+            ${lightingNote ? `<span class="lighting-detail" aria-hidden="true">${lightingNote}</span>` : ''}
+          </p>` : '';
 
                 const safetyImage =
                     status === 'safe' ? "/pipe-safe/safe.svg" :
@@ -115,9 +134,11 @@ export function setupWeatherDisplay(
               <span class="label">Humidity</span>
               <span class="value" style="color: ${humidityColor};"><i class="fa-solid fa-droplet"></i> ${formatTwoDigits(currentHumidity)}%</span>
             </div>
+            ${windColumn}
           </div>
           <img class="safety-image" src="${safetyImage}" alt="${status}">
           <p class="reason">Reason: ${reason}</p>
+          ${lightingRow}
         `;
 
                 forecastComponent.updateForecast(currentTemp, currentHumidity, isCurrentlySafe, currentStatus);

@@ -23,6 +23,9 @@ export function setupInfoModal(container: HTMLElement) {
         
         <h2>Humidity</h2>
         <p class="info-text">Humidity is not a major concern for short-term car storage (up to 12 hours) and is not factored into PipeSafe’s safety calculations. For long-term storage, consider humidity to prevent drying or excess moisture.</p>
+
+        <h2>Wind</h2>
+        <p class="info-text">Wind does not affect PipeSafe’s car-storage calculation. It is shown so you can judge lighting conditions. Matches and soft-flame lighters get difficult around 8–12 mph and are often impractical above about 15–18 mph, especially with gusts. A Zippo with a pipe insert, a torch used carefully, or a wall/car as a windbreak works better. Strong wind also makes a lit bowl burn hotter and faster.</p>
         
         <h2>Car</h2>
         <p class="info-text">Full sun can raise a closed cabin about 20–40°F above the outside temperature. Shade stays much closer to the outside air. The Car Temperature setting (+0, +10, +20, or +40°F) is a sun offset: it is added only in daytime when the car is In Open. After sunset that offset is not applied. Park in the shade or use a sunshade, and use a sturdy vented container so warm air does not build pressure.</p>

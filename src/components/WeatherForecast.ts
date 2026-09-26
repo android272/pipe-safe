@@ -1,5 +1,10 @@
 import '../css/WeatherForecast.css';
 import { formatLocationTime, isDaytime, safeUntilText, sunOffsetF } from './solar';
+import { finiteWind, forecastWindText, forecastWindTone } from './wind';
+
+interface WindFields {
+    wind?: { speed?: number; gust?: number };
+}
 
 interface ForecastData {
     cod: number | string;
@@ -9,10 +14,10 @@ interface ForecastData {
         main: { temp: number; humidity: number };
         dt_txt: string;
         weather: { id: number; main: string }[];
-    }>;
+    } & WindFields>;
 }
 
-interface CurrentWeather {
+interface CurrentWeather extends WindFields {
     dt?: number;
     timezone?: number;
     weather?: { id: number; main: string }[];
@@ -28,7 +33,9 @@ interface ForecastItem {
     time: string;
     temp: number;
     humidity: number;
-    weatherIcon: string; // Add weatherIcon
+    weatherIcon: string;
+    windSpeed?: number;
+    windGust?: number;
 }
 
 export function setupWeatherForecast(
@@ -100,6 +107,20 @@ export function setupWeatherForecast(
         return Number.isFinite(value) ? Math.round(value).toString().padStart(2, '0') : 'N/A';
     };
 
+    const readWind = (point?: WindFields): { speed?: number; gust?: number } => ({
+        speed: finiteWind(point?.wind?.speed),
+        gust: finiteWind(point?.wind?.gust),
+    });
+
+    const windMarkup = (speed?: number, gust?: number): string => {
+        const wind = forecastWindText(speed, gust);
+        const tone = forecastWindTone(wind.high);
+        const toneClass = tone === 'strong' ? ' wind-strong' : tone === 'amber' ? ' wind-amber' : '';
+        return `<span class="wind${toneClass}" aria-label="${wind.aria}">
+                    <span class="wind-line" aria-hidden="true"><i class="fa-solid fa-wind"></i> ${wind.text}</span>
+                </span>`;
+    };
+
     const updateForecast = (currentTemp: number, currentHumidity: number, isCurrentlySafe: boolean, currentStatus: string) => {
         lastCurrentTemp = currentTemp;
         lastCurrentHumidity = currentHumidity;
@@ -128,11 +149,14 @@ export function setupWeatherForecast(
                 // sun offset only when that hour is daytime and the car is In Open.
                 const nowUnix = Math.floor(Date.now() / 1000);
                 const twelveHoursLater = nowUnix + 12 * 3600;
+                const nowWind = readWind(current);
                 const forecastItems: ForecastItem[] = [{
                     time: 'Now',
                     temp: currentTemp,
                     humidity: currentHumidity,
                     weatherIcon: getWeatherIcon(current.weather || [], current.dt ?? nowUnix, sunrise, sunset, timezone),
+                    windSpeed: nowWind.speed,
+                    windGust: nowWind.gust,
                 }];
 
                 const validPoints = (forecast.list || []).filter(
@@ -163,11 +187,27 @@ export function setupWeatherForecast(
                         : blend(targetTime, prevPoint.main.humidity, prevPoint.dt, nextPoint.main.humidity, nextPoint.dt);
                     const daytime = isDaytime(targetTime, sunrise, sunset, timezone);
                     const interior = outside + sunOffsetF(settings.carTempIncrease, parkingCondition, daytime);
+                    const snapped = prevPoint.dt === targetTime || Math.abs(prevPoint.dt - targetTime) < 300;
+                    const prevWind = readWind(prevPoint);
+                    const nextWind = readWind(nextPoint);
+                    let windSpeed: number | undefined;
+                    let windGust: number | undefined;
+                    if (snapped || prevPoint.dt >= nextPoint.dt) {
+                        windSpeed = prevWind.speed;
+                        windGust = prevWind.gust;
+                    } else if (prevWind.speed != null && nextWind.speed != null) {
+                        windSpeed = blend(targetTime, prevWind.speed, prevPoint.dt, nextWind.speed, nextPoint.dt);
+                        if (prevWind.gust != null && nextWind.gust != null) {
+                            windGust = blend(targetTime, prevWind.gust, prevPoint.dt, nextWind.gust, nextPoint.dt);
+                        }
+                    }
                     forecastItems.push({
                         time: hourLabel(targetTime),
                         temp: interior,
                         humidity,
                         weatherIcon: getWeatherIcon(prevPoint.weather || nextPoint.weather || [], targetTime, sunrise, sunset, timezone),
+                        windSpeed,
+                        windGust,
                     });
                 }
 
@@ -195,6 +235,7 @@ export function setupWeatherForecast(
                   <span class="weather-icon">${item.weatherIcon}</span>
                   <span class="temp" style="color: ${tempColor(item.temp)};"><i class="fa-solid fa-temperature-quarter"></i> ${formatTwoDigits(item.temp)}°F</span>
                   <span class="humidity" style="color: ${humidityColor(item.humidity)};"><i class="fa-solid fa-droplet"></i> ${formatTwoDigits(item.humidity)}%</span>
+                  ${windMarkup(item.windSpeed, item.windGust)}
                 </div>
               `
                         )
